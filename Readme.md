@@ -1,34 +1,42 @@
-# Project Proposal: Chess Opening Performance Visualizer
+# Project Proposal: Chess Opening Head-to-Head Performance Visualizer
 
 ## 1. High-Level Goal
 
-Develop an interactive web application to visualize and compare chess opening win rates based on player Elo ratings.
+Develop an interactive web application using R (potentially with the Shiny framework) to visualize and compare the performance and popularity of specific chess openings when played against each other, segmented by player Elo rating brackets.
 
 ## 2. Goals and Motivation
 
-Motivated by our interest in chess and the difficulty of analyzing opening statistics from tables, our goal is to create an interactive web application visualizing win rates by Elo (Bar charts, histograms, etc). This project addresses the lack of accessible tools for easy, visual comparison of opening performance, especially filtered by skill level.
+Our core motivation stems from a shared interest in chess and the observation that analyzing opening performance, especially direct comparisons between openings at different skill levels, is often cumbersome using static tables or raw databases. Our goal is to create an interactive web application that allows users to:
 
-This tool aims to help players make informed opening choices by presenting complex data intuitively. It provides a clear view of opening effectiveness across different Elo ranges, moving beyond static tables. For our team, it's an opportunity to develop practical skills in data crawling, processing, web development, and visualization, while creating a potentially useful resource for the chess community and future analysis.
+* Select specific chess openings.
+* Compare their win/draw/loss rates when played *against other selected openings*.
+* Filter these comparisons based on player Elo rating ranges.
+* Visualize the relative popularity (frequency of play) of these openings within the chosen Elo brackets.
+* Present this information clearly using interactive charts (e.g., grouped bar charts, potentially heatmaps or scatter plots) generated with R.
+
+This project aims to provide a more intuitive tool for chess players to make informed decisions about their opening repertoire, understanding how openings perform and how popular they are against specific counterparts at their own playing strength. For our team, this project offers a valuable opportunity to deepen our skills in data acquisition, data manipulation and statistical analysis using R (e.g., `dplyr`, `data.table`), interactive web application development with R/Shiny, and data visualization (e.g., `ggplot2`, `plotly`).
 
 ## 3. Project Focus and Data Handling
 
-**Focus:** Build a frontend-centric web app visualizing pre-processed chess statistics.
+**Focus:** Build an R/Shiny web application to visualize processed chess game statistics, specifically focusing on the head-to-head performance and popularity of openings across different Elo levels.
 
 **Data:**
-* **Source:** Primarily `chesstempo.com/game-database/` (subject to Terms of Service check; alternatives like Lichess Open DB if needed).
-* **Collection:** Web crawling using Python (`requests`/`BeautifulSoup`/`Scrapy`).
-* **Processing:** Extract opening, Elos, results from games; aggregate win/draw/loss rates per opening pair and Elo bracket.
-* **Storage:** Store aggregated statistics efficiently for frontend use (e.g., JSON files or SQLite).
+* **Source:** Primarily large, publicly available chess game databases. Potential sources include the Lichess Open Database (`lichess.org/database`) or other PGN collections. Using pre-aggregated statistics from sites like `chesstempo.com` might be difficult for direct opening-vs-opening comparison, requiring processing of raw game data. We will need to verify Terms of Service for any source used.
+* **Collection:** Download large PGN datasets. Potentially use web scraping (R packages like `rvest` or Python scripts) if suitable aggregated data is found, but PGN processing is more likely.
+* **Processing:** Utilize R for the entire processing pipeline:
+    * Parse PGN files (e.g., using R packages like `bigchess` or `rchess`) to extract game moves, results, and player Elos.
+    * Identify the specific opening played in each game (e.g., based on the first N moves or matching ECO codes).
+    * Filter games where one target opening is played against another target opening.
+    * Categorize games into defined Elo brackets (e.g., <1200, 1200-1400, 1400-1600, ..., 2200+). Average Elo of the two players could be used.
+    * Aggregate statistics: For each Elo bracket and each opening pair (Opening A vs. Opening B), calculate the win rates (White Win %, Draw %, Black Win %) and the total number of games (as a measure of matchup frequency/popularity). Also calculate the overall frequency of each individual opening within the Elo bracket.
+* **Storage:** Store the final aggregated statistics in an efficient format readily usable by the R/Shiny application (e.g., RDS files, Feather files, or potentially a simple SQLite database).
 
-## 4. Weekly Plan (4 Weeks, 3 Members)
+## 4. Project Timeline and Milestones (Starting April 27th, 2025)
 
-* **Team:** Vu Ai Thanh (Lead Dev), Tran Khanh Bang (Developer), Ha Minh Dung (Developer).
+* **Team:** Vu Ai Thanh (Lead Dev - R/Shiny Focus), Tran Khanh Bang (Developer - Data Processing/R Focus), Ha Minh Dung (Developer - UI/Documentation Focus).
 
-| Week  | Focus                                   | Key Tasks & Lead Responsibility (Thanh/Bang/Dung)                                                                          |
-| :---- | :-------------------------------------- | :------------------------------------------------------------------------------------------------------------------------- |
-| **1** | **Planning & Data Setup** | Finalize scope; Setup GitHub (Dung); Investigate source/T&Cs; Start crawler dev (Bang); Plan data structure (Thanh).        |
-| **2** | **Data Collection & Processing** | Run/monitor crawler (Bang); Clean data; Develop aggregation logic (Thanh); Store aggregated data; Document format (Dung). |
-| **3** | **Frontend Development & Integration** | Build UI (HTML/CSS - Dung/Bang); Implement charting (Thanh); Connect frontend to data (Bang); Add interactivity.             |
-| **4** | **Testing, Refinement & Finalization** | Full testing (All); Bug fixing (Bang/Thanh); UI/UX polish; Finalize README (Dung); Prepare submission (All).                |
-
-
+| Phase                                   | Deadline    | Focus                            | Key Tasks & Lead Responsibility (Thanh/Bang/Dung)                                                                                                                                                              |
+| :-------------------------------------- | :---------- | :------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Phase 1: Data Preparation & Setup** | **May 4th** | **Data Acquisition & Processing** | Finalize scope (openings, Elo brackets); Set up GitHub (Dung); Identify/acquire PGN data source (Bang); Implement R scripts for PGN parsing, cleaning, filtering (Bang); Develop R logic for aggregation (Head-to-head stats, popularity) (Thanh); Define & create storage format for processed data (Dung). |
+| **Phase 2: Prototype Development** | **May 15th**| **Core App Functionality** | Build initial Shiny UI structure (inputs, output areas) (Dung); Implement core Shiny server logic to load data and react to inputs (Thanh); Create basic interactive visualizations (ggplot2/plotly) (Thanh); Connect UI inputs to server logic for dynamic updates (Bang); Integrate processed data for a working end-to-end prototype (All). |
+| **Phase 3: App Completion & Refinement**| **Post-May 15th** | **Testing, Polishing, Finalization** | Conduct comprehensive testing (different browsers, edge cases) (All); Debug R code and Shiny app issues (Bang/Thanh); Enhance visualizations and improve UI/UX based on prototype feedback (Dung/Thanh); Write detailed README and any necessary documentation (Dung); Prepare final project submission/deployment (All). |
