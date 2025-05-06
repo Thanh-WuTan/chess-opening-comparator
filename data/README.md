@@ -59,7 +59,7 @@ docker run -d \
   -v mysql_data:/var/lib/mysql \
   chess-mysql
 ```
-## Importing the Data
+## 🏃Importing the Data
 After starting the MySQL container and ensuring the schema is created (e.g., via schema.sql), run: (in data/ directory)
 ```bash
 python3 read_chess_games.py
@@ -70,13 +70,13 @@ This will:
 
 - Insert rows into games and openings tables using multiprocessing
 
-## Notes
+## ✅ Notes
 You must install required Python packages before running the script:
 ```bash
 pip install -r requirements.txt
 ```
 
-## Resetting the Database
+## 🧹Resetting the Database
 To delete all entries from games and reset AUTO_INCREMENT:  
 ```sql
 DELETE FROM games;
