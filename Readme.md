@@ -40,3 +40,26 @@ This project aims to provide a more intuitive tool for chess players to make inf
 | **Phase 1: Data Preparation & Setup** | **May 4th** | **Data Acquisition & Processing** | Finalize scope (openings, Elo brackets); Set up GitHub (Dung); Identify/acquire PGN data source (Bang); Implement R scripts for PGN parsing, cleaning, filtering (Dung); Develop R logic for aggregation (Head-to-head stats, popularity) (Thanh); Define & create storage format for processed data (Bang). |
 | **Phase 2: Prototype Development** | **May 15th**| **Core App Functionality** | Build initial Shiny UI structure (inputs, output areas) (Dung); Implement core Shiny server logic to load data and react to inputs (Thanh); Create basic interactive visualizations (ggplot2/plotly) (Bang); Connect UI inputs to server logic for dynamic updates (Bang); Integrate processed data for a working end-to-end prototype (All). |
 | **Phase 3: App Completion & Refinement**| **Post-May 15th** | **Testing, Polishing, Finalization** | Conduct comprehensive testing (different browsers, edge cases) (All); Debug R code and Shiny app issues (Bang/Thanh); Enhance visualizations and improve UI/UX based on prototype feedback (Dung/Thanh); Write detailed README and any necessary documentation (Dung); Prepare final project submission/deployment (All). |
+
+## 5. Set Up Instructions
+
+### Step 1: Set Up the Database
+
+Before running the app, you must set up the MySQL database using Docker.
+
+➡️ Please follow the instructions in `data/README.md` to start the containerized database and populate the required tables.
+
+### Step 2: Install Required R Packages
+
+Run the following script in R to install all the necessary packages:
+
+```r
+source("install_packages.R")
+```
+
+### Step 3: Run the App
+
+Launch the Shiny app by running the following in your R console:
+```r
+shiny::runApp("app.R")
+```
