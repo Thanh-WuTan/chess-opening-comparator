@@ -25,3 +25,29 @@ get_opening_stats <- function(con, opening_name) {
   
   return(stats)
 }
+
+# Function to fetch game length data for a given opening
+get_game_lengths <- function(con, opening_name) {
+  query <- paste0(
+    "SELECT g.nb_of_moves AS game_length
+     FROM games g
+     JOIN openings o ON g.opening_id = o.opening_id
+     WHERE o.name = '", dbEscapeStrings(con, opening_name), "'"
+  )
+  
+  data <- dbGetQuery(con, query)
+  return(data)
+}
+
+# Function to fetch ELO data for a given opening
+get_elo_distribution <- function(con, opening_name) {
+  query <- paste0(
+    "SELECT g.avg_elo
+     FROM games g
+     JOIN openings o ON g.opening_id = o.opening_id
+     WHERE o.name = '", dbEscapeStrings(con, opening_name), "'"
+  )
+  
+  data <- dbGetQuery(con, query)
+  return(data)
+}
