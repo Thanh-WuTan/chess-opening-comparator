@@ -5,7 +5,8 @@ packages <- c(
   "DBI",
   "RMySQL",
   "ggplot2",
-  "dotenv"
+  "dotenv",
+  "reticulate"  # added here
 )
 
 install_if_missing <- function(pkg) {

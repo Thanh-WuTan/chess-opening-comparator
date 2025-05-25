@@ -1,6 +1,10 @@
 # Loading required libraries
 library(shiny)
 library(ggplot2)
+library(reticulate)
+
+# Import hàm chat() từ Gemini.py
+source_python("Gemini.py")
 
 # Sourcing helper functions
 source("db_utils/con_helpers.R")
@@ -39,6 +43,14 @@ ui <- fluidPage(
     ),
     
     mainPanel(
+      # Đẩy phần Opening Moves lên đầu với tiêu đề riêng cho mỗi opening
+      h4(textOutput("opening1_title")),
+      verbatimTextOutput("opening1_moves"),
+      hr(),
+      h4(textOutput("opening2_title")),
+      verbatimTextOutput("opening2_moves"),
+      hr(),
+      
       h3(textOutput("comparison_title")),
       plotOutput("win_plot", height = "400px"),
       hr(),
@@ -46,7 +58,7 @@ ui <- fluidPage(
       hr(),
       plotOutput("game_length_violin_plot", height = "450px"),
       hr(),
-      plotOutput("elo_distribution_plot", height = "450px")  # New plot
+      plotOutput("elo_distribution_plot", height = "450px")
     )
   )
 )
@@ -160,7 +172,45 @@ server <- function(input, output, session) {
     }
   })
   
-  # 8. Clean-up
+  # Hàm làm sạch kết quả trả về từ Gemini (loại bỏ markdown, kí tự thừa,...)
+  clean_moves <- function(text) {
+    text <- gsub("```python", "", text)
+    text <- gsub("```", "", text)
+    text <- gsub("\n", "", text)
+    text <- gsub("\\[|\\]", "", text)
+    text <- gsub("'", "", text)
+    text <- gsub(",", "", text)
+    text <- trimws(text)
+    return(text)
+  }
+  
+  # 8. Lấy và hiển thị danh sách các bước mở cờ từ hàm chat()
+  observeEvent(input$compare, {
+    if (input$opening1 != "Select an opening" && input$opening2 != "Select an opening") {
+      moves1_raw <- chat(input$opening1)
+      moves2_raw <- chat(input$opening2)
+      
+      moves1 <- clean_moves(moves1_raw)
+      moves2 <- clean_moves(moves2_raw)
+      
+      output$opening1_moves <- renderText({
+        moves1
+      })
+      output$opening2_moves <- renderText({
+        moves2
+      })
+      
+      # Cập nhật tiêu đề cho từng opening
+      output$opening1_title <- renderText({
+        paste("Opening Moves for", input$opening1)
+      })
+      output$opening2_title <- renderText({
+        paste("Opening Moves for", input$opening2)
+      })
+    }
+  })
+  
+  # 9. Clean-up
   onStop(function() { dbDisconnect(con) })
 }
 
