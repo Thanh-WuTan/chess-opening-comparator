@@ -3,7 +3,7 @@ import os
 
 
 #Lên trang Gemini API, tạo API key (free)
-os.environ["API_KEY"] = "AIzaSyAy6AlFNN6sIqRVLnbKAKRw4_AIrtdat1s" #Điền API trong ""
+os.environ["API_KEY"] = "" #Điền API trong ""
 genai.configure(api_key=os.environ["API_KEY"])
 
 # Tạo model = API: gemini-1.5-flash: nhanh mà ngu, gemini-1.5-pro: khôn mà chậm
