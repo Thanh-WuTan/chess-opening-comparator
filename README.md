@@ -49,10 +49,23 @@ Before running the app, you must set up the MySQL database using Docker.
 
 ➡️ Please follow the instructions in `data/README.md` to start the containerized database and populate the required tables.
 
-### Step 2: Install Required R Packages
++ Add your API Key to .env: 
+```bash
+...
+API_KEY=yourapikey
+```
 
-Run the following script in R to install all the necessary packages:
+### Step 2: Install Requirements
 
+\textbf{Python Requirements}
+- Ensure Python is installed on your system.
+- Install the required Python packages by running
+```bash
+pip install -r requirements.txt
+```
+
+\textbf{R Requirements}
+- Install the required R packages by running the following in your R console:
 ```r
 source("install_packages.R")
 ```
