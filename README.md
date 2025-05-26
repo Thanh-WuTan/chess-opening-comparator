@@ -57,14 +57,14 @@ API_KEY=yourapikey
 
 ### Step 2: Install Requirements
 
-\textbf{Python Requirements}
+**Python Requirements**
 - Ensure Python is installed on your system.
 - Install the required Python packages by running
 ```bash
 pip install -r requirements.txt
 ```
 
-\textbf{R Requirements}
+**R Requirements**
 - Install the required R packages by running the following in your R console:
 ```r
 source("install_packages.R")
