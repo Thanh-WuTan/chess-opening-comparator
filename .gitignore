@@ -2,3 +2,5 @@
 data/chess_games.csv
 .Rproj.user
 venv/
+.RData
+.Rhistory
