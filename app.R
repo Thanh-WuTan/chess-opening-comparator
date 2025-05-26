@@ -1,10 +1,14 @@
+# Install required packages
+source("install_packages.R")
+
 # Loading required libraries
 library(shiny)
 library(ggplot2)
 library(reticulate)
 
-# Import hàm chat() từ Gemini.py
+
 source_python("Gemini.py")
+
 
 # Sourcing helper functions
 source("db_utils/con_helpers.R")
@@ -44,21 +48,20 @@ ui <- fluidPage(
     
     mainPanel(
       # Đẩy phần Opening Moves lên đầu với tiêu đề riêng cho mỗi opening
+      h3(textOutput("comparison_title")),
       h4(textOutput("opening1_title")),
       verbatimTextOutput("opening1_moves"),
       hr(),
       h4(textOutput("opening2_title")),
       verbatimTextOutput("opening2_moves"),
       hr(),
-      
-      h3(textOutput("comparison_title")),
       plotOutput("win_plot", height = "400px"),
-      hr(),
-      plotOutput("popular_openings_plot", height = "450px"),
       hr(),
       plotOutput("game_length_violin_plot", height = "450px"),
       hr(),
-      plotOutput("elo_distribution_plot", height = "450px")
+      plotOutput("elo_distribution_plot", height = "450px"),
+      hr(),
+      plotOutput("popular_openings_plot", height = "450px"),
     )
   )
 )
