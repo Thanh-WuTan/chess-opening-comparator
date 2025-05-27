@@ -49,19 +49,26 @@ def insert_game(cursor, row):
     black_elo = int(row[7])
     result = result_converter(row[3])
     eco = row[10].strip()
-    open_name = row[11]
     opening_name = row[11].strip()
     an = row[14]
+    time_control = row[12].strip()  # Assuming TimeControl is in column 9
     nb_moves = count_moves(an)
     avg_elo = (white_elo + black_elo) / 2
 
-
+    # Check for missing or empty TimeControl
+    if not time_control or time_control == '-':
+        return False  # Skip this game
+    
+    if '+' in time_control:
+        time_control = time_control.split('+')[0]
+    
     opening_id = get_or_create_opening(cursor, opening_name, eco)
     cursor.execute("""
         INSERT INTO games (
-            event, result, white_elo, black_elo, open_name, opening_id, nb_of_moves, avg_elo
-        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-    """, (event, result, white_elo, black_elo, opening_name, opening_id, nb_moves, avg_elo))
+            event, result, white_elo, black_elo, open_name, opening_id, nb_of_moves, avg_elo, TimeControl
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """, (event, result, white_elo, black_elo, opening_name, opening_id, nb_moves, avg_elo, time_control))
+    return True
 
 def main():
     conn = mysql.connector.connect(**DB_CONFIG)
@@ -70,21 +77,20 @@ def main():
     with open('data/chess_games.csv', newline='', encoding='utf-8') as csvfile:
         cnt = 0
         reader = csv.reader(csvfile)
-        for row in reader:
-            
-            if row[0] == 'Event':
-                continue
+        next(reader)  # Skip header row
+        for row in tqdm(reader, desc="Processing games"):
             try:
-                print("Processing", cnt)
-                insert_game(cursor, row)
+                if insert_game(cursor, row):
+                    conn.commit()
+                else:
+                    pass
             except Exception as e:
-                print("Error inserting row:", row)
+                print(f"Error inserting row {cnt}:", row)
                 print(e)
-            cnt+= 1
-            conn.commit()
-            
+            cnt += 1
 
     cursor.close()
     conn.close()
+
 if __name__ == "__main__":
     main()
