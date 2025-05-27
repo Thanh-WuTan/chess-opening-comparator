@@ -6,21 +6,17 @@ library(shiny)
 library(ggplot2)
 library(reticulate)
 
-
 source_python("Gemini.py")
-
 
 # Sourcing helper functions
 source("db_utils/con_helpers.R")
 source("db_utils/games_helpers.R")
 source("db_utils/openings_helpers.R")
 source("db_utils/popular_openings_helpers.R")
-source('plot_utils/game_length_violin.R')# NEW
+source("plot_utils/game_length_violin.R")
 source("plot_utils/win_loss_rate.R")
-source("plot_utils/popular_openings_pie.R")     # NEW
+source("plot_utils/popular_openings_pie.R")
 source("plot_utils/elo_distribution_histogram.R")
-
-
 
 # ----------------------------- UI ---------------------------------
 ui <- fluidPage(
@@ -48,7 +44,7 @@ ui <- fluidPage(
     ),
     
     mainPanel(
-      # Đẩy phần Opening Moves lên đầu với tiêu đề riêng cho mỗi opening
+      # Opening Moves section
       h2(textOutput("comparison_title")),
       h4(textOutput("opening1_title")),
       verbatimTextOutput("opening1_moves"),
@@ -56,13 +52,25 @@ ui <- fluidPage(
       h4(textOutput("opening2_title")),
       verbatimTextOutput("opening2_moves"),
       hr(),
+      
+      # Win/Loss Rate Plot
+      h3("Win/Loss Rate Comparison"),
       plotOutput("win_plot", height = "400px"),
       hr(),
+      
+      # Game Length Violin Plot
+      h3("Game Length Distribution"),
       plotOutput("game_length_violin_plot", height = "450px"),
       hr(),
+      
+      # ELO Distribution Plot
+      h3("ELO Distribution Comparison"),
       plotOutput("elo_distribution_plot", height = "450px"),
       hr(),
-      plotOutput("popular_openings_plot", height = "450px"),
+      
+      # Popular Openings Plot
+      h3("Popular Openings by ELO Range"),
+      plotOutput("popular_openings_plot", height = "450px")
     )
   )
 )
@@ -176,7 +184,7 @@ server <- function(input, output, session) {
     }
   })
   
-  # Hàm làm sạch kết quả trả về từ Gemini (loại bỏ markdown, kí tự thừa,...)
+  # Clean Gemini output
   clean_moves <- function(text) {
     text <- gsub("```python", "", text)
     text <- gsub("```", "", text)
@@ -188,7 +196,7 @@ server <- function(input, output, session) {
     return(text)
   }
   
-  # 8. Lấy và hiển thị danh sách các bước mở cờ từ hàm chat()
+  # 8. Fetch and display opening moves from chat()
   observeEvent(input$compare, {
     if (input$opening1 != "Select an opening" && input$opening2 != "Select an opening") {
       moves1_raw <- chat(input$opening1)
@@ -204,7 +212,7 @@ server <- function(input, output, session) {
         moves2
       })
       
-      # Cập nhật tiêu đề cho từng opening
+      # Update titles for each opening
       output$opening1_title <- renderText({
         paste("Opening Moves for", input$opening1)
       })
