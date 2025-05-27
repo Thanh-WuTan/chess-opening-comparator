@@ -14,7 +14,8 @@ source_python("Gemini.py")
 source("db_utils/con_helpers.R")
 source("db_utils/games_helpers.R")
 source("db_utils/openings_helpers.R")
-source("db_utils/popular_openings_helpers.R")   # NEW
+source("db_utils/popular_openings_helpers.R")
+source('plot_utils/game_length_violin.R')# NEW
 source("plot_utils/win_loss_rate.R")
 source("plot_utils/popular_openings_pie.R")     # NEW
 source("plot_utils/elo_distribution_histogram.R")
@@ -48,7 +49,7 @@ ui <- fluidPage(
     
     mainPanel(
       # Đẩy phần Opening Moves lên đầu với tiêu đề riêng cho mỗi opening
-      h3(textOutput("comparison_title")),
+      h2(textOutput("comparison_title")),
       h4(textOutput("opening1_title")),
       verbatimTextOutput("opening1_moves"),
       hr(),
