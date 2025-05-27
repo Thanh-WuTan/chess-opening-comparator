@@ -58,10 +58,7 @@ def insert_game(cursor, row):
     # Check for missing or empty TimeControl
     if not time_control or time_control == '-':
         return False  # Skip this game
-    
-    if '+' in time_control:
-        time_control = time_control.split('+')[0]
-    
+
     opening_id = get_or_create_opening(cursor, opening_name, eco)
     cursor.execute("""
         INSERT INTO games (
