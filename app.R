@@ -13,10 +13,12 @@ source("db_utils/con_helpers.R")
 source("db_utils/games_helpers.R")
 source("db_utils/openings_helpers.R")
 source("db_utils/popular_openings_helpers.R")
+source("db_utils/get_time_control_distribution.R")
 source("plot_utils/game_length_violin.R")
 source("plot_utils/win_loss_rate.R")
 source("plot_utils/popular_openings_pie.R")
 source("plot_utils/elo_distribution_histogram.R")
+source("plot_utils/plot_time_control_distribution.R")
 
 # ----------------------------- UI ---------------------------------
 ui <- fluidPage(
@@ -66,6 +68,11 @@ ui <- fluidPage(
       # ELO Distribution Plot
       h3("ELO Distribution Comparison"),
       plotOutput("elo_distribution_plot", height = "450px"),
+      hr(),
+      
+      # Time Control Distribution Plot
+      h3("Time Control Distribution Comparison"),
+      plotOutput("time_control_plot", height = "450px"),
       hr(),
       
       # Popular Openings Plot
@@ -184,7 +191,28 @@ server <- function(input, output, session) {
     }
   })
   
-  # Clean Gemini output
+  # 8. Time control distribution plot
+  output$time_control_plot <- renderPlot({
+    if (input$compare == 0 ||
+        input$opening1 == "Select an opening" ||
+        input$opening2 == "Select an opening") {
+      return(NULL)
+    }
+    
+    data1 <- get_time_control_distribution(con, input$opening1)
+    data2 <- get_time_control_distribution(con, input$opening2)
+    
+    if (nrow(data1) == 0 || nrow(data2) == 0) {
+      ggplot() +
+        annotate("text", x = 1, y = 1,
+                 label = "No data available for one or both openings") +
+        theme_minimal()
+    } else {
+      plot_time_control_distribution(data1, data2, input$opening1, input$opening2)
+    }
+  })
+  
+  # 9. Clean Gemini output
   clean_moves <- function(text) {
     text <- gsub("```python", "", text)
     text <- gsub("```", "", text)
@@ -196,7 +224,7 @@ server <- function(input, output, session) {
     return(text)
   }
   
-  # 8. Fetch and display opening moves from chat()
+  # 10. Fetch and display opening moves from chat()
   observeEvent(input$compare, {
     if (input$opening1 != "Select an opening" && input$opening2 != "Select an opening") {
       moves1_raw <- chat(input$opening1)
@@ -222,7 +250,7 @@ server <- function(input, output, session) {
     }
   })
   
-  # 9. Clean-up
+  # 11. Clean-up
   onStop(function() { dbDisconnect(con) })
 }
 
