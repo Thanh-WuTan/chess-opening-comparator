@@ -12,11 +12,9 @@ source_python("Gemini.py")
 source("db_utils/con_helpers.R")
 source("db_utils/games_helpers.R")
 source("db_utils/openings_helpers.R")
-source("db_utils/popular_openings_helpers.R")
 source("db_utils/get_time_control_distribution.R")
 source("plot_utils/game_length_violin.R")
 source("plot_utils/win_loss_rate.R")
-source("plot_utils/popular_openings_pie.R")
 source("plot_utils/elo_distribution_histogram.R")
 source("plot_utils/plot_time_control_distribution.R")
 
@@ -31,18 +29,6 @@ ui <- fluidPage(
       selectInput("opening1", "First Opening:", choices = c("Loading...")),
       selectInput("opening2", "Second Opening:", choices = c("Loading...")),
       actionButton("compare", "Compare Openings"),
-      
-      hr(),
-      h4("Popular Openings by ELO Range"),
-      sliderInput(
-        "elo_range",
-        "Select ELO Range:",
-        min   = 1000,
-        max   = 2800,
-        value = c(1400, 1600),
-        step  = 100
-      ),
-      actionButton("show_pie", "Show Popular Openings")
     ),
     
     mainPanel(
@@ -74,10 +60,6 @@ ui <- fluidPage(
       h3("Time Control Distribution Comparison"),
       plotOutput("time_control_plot", height = "450px"),
       hr(),
-      
-      # Popular Openings Plot
-      h3("Popular Openings by ELO Range"),
-      plotOutput("popular_openings_plot", height = "450px")
     )
   )
 )
@@ -127,27 +109,7 @@ server <- function(input, output, session) {
       plot_win_loss_rate(stats1, stats2, input$opening1, input$opening2)
     }
   })
-  
-  # 5. Pie chart – Popular openings by ELO range
-  output$popular_openings_plot <- renderPlot({
-    input$show_pie  # trigger
-    
-    isolate({
-      elo_min <- input$elo_range[1]
-      elo_max <- input$elo_range[2]
-      
-      top_data <- get_top_openings_by_elo_range(con, elo_min, elo_max, top_n = 15)
-      
-      if (nrow(top_data) == 0) {
-        ggplot() +
-          annotate("text", x = 1, y = 1,
-                   label = "No data available for selected ELO range") +
-          theme_minimal()
-      } else {
-        plot_opening_pie(top_data, elo_min, elo_max)
-      }
-    })
-  })
+
   
   # 6. Game length violin plot
   output$game_length_violin_plot <- renderPlot({
