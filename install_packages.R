@@ -6,7 +6,10 @@ packages <- c(
   "RMySQL",
   "ggplot2",
   "dotenv",
-  "reticulate"  # added here
+  "reticulate",
+  "gridExtra",
+  "chess",
+  "reshape2"
 )
 
 install_if_missing <- function(pkg) {

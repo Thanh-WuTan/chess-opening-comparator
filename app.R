@@ -15,11 +15,13 @@ source("db_utils/games_helpers.R")
 source("db_utils/openings_helpers.R")
 source("db_utils/get_time_control_distribution.R")
 source("db_utils/get_castling_stats.R")
+source("db_utils/get_piece_placement.R")
 source("plot_utils/game_length_violin.R")
 source("plot_utils/win_loss_rate.R")
 source("plot_utils/elo_distribution_histogram.R")
 source("plot_utils/plot_time_control_distribution.R")
 source("plot_utils/plot_castling_stats.R")
+source("plot_utils/plot_piece_placement_heatmap.R")
 
 # ----------------------------- UI ---------------------------------
 ui <- fluidPage(
@@ -67,6 +69,11 @@ ui <- fluidPage(
       # Castling Comparison Plot
       h3("Castling Comparison"),
       plotOutput("castling_plot", height = "600px"),
+      hr(),
+      
+      # Piece Placement Heatmap
+      h3("Piece Placement Heatmap"),
+      plotOutput("piece_placement_plot", height = "450px"),
       hr()
     )
   )
@@ -202,7 +209,28 @@ server <- function(input, output, session) {
     }
   })
   
-  # 9. Clean Gemini output
+  # 9. Piece placement heatmap
+  output$piece_placement_plot <- renderPlot({
+    if (input$compare == 0 ||
+        input$opening1 == "Select an opening" ||
+        input$opening2 == "Select an opening") {
+      return(NULL)
+    }
+    
+    data1 <- get_piece_placement(con, input$opening1)
+    data2 <- get_piece_placement(con, input$opening2)
+    
+    if (nrow(data1) == 0 || nrow(data2) == 0 || sum(data1$count) == 0 || sum(data2$count) == 0) {
+      ggplot() +
+        annotate("text", x = 1, y = 1,
+                 label = "No data available for one or both openings") +
+        theme_minimal()
+    } else {
+      plot_piece_placement_heatmap(data1, data2, input$opening1, input$opening2)
+    }
+  })
+  
+  # 10. Clean Gemini output
   clean_moves <- function(text) {
     text <- gsub("```python", "", text)
     text <- gsub("```", "", text)
@@ -214,7 +242,7 @@ server <- function(input, output, session) {
     return(text)
   }
   
-  # 10. Fetch and display opening moves from chat()
+  # 11. Fetch and display opening moves from chat()
   observeEvent(input$compare, {
     if (input$opening1 != "Select an opening" && input$opening2 != "Select an opening") {
       moves1_raw <- chat(input$opening1)
@@ -240,7 +268,7 @@ server <- function(input, output, session) {
     }
   })
   
-  # 11. Clean-up
+  # 12. Clean-up
   onStop(function() { dbDisconnect(con) })
 }
 
