@@ -5,6 +5,7 @@ source("install_packages.R")
 library(shiny)
 library(ggplot2)
 library(reticulate)
+library(gridExtra)
 
 source_python("Gemini.py")
 
@@ -13,10 +14,12 @@ source("db_utils/con_helpers.R")
 source("db_utils/games_helpers.R")
 source("db_utils/openings_helpers.R")
 source("db_utils/get_time_control_distribution.R")
+source("db_utils/get_castling_stats.R")
 source("plot_utils/game_length_violin.R")
 source("plot_utils/win_loss_rate.R")
 source("plot_utils/elo_distribution_histogram.R")
 source("plot_utils/plot_time_control_distribution.R")
+source("plot_utils/plot_castling_stats.R")
 
 # ----------------------------- UI ---------------------------------
 ui <- fluidPage(
@@ -60,6 +63,11 @@ ui <- fluidPage(
       h3("Time Control Distribution Comparison"),
       plotOutput("time_control_plot", height = "450px"),
       hr(),
+      
+      # Castling Comparison Plot
+      h3("Castling Comparison"),
+      plotOutput("castling_plot", height = "600px"),
+      hr()
     )
   )
 )
@@ -109,9 +117,8 @@ server <- function(input, output, session) {
       plot_win_loss_rate(stats1, stats2, input$opening1, input$opening2)
     }
   })
-
   
-  # 6. Game length violin plot
+  # 5. Game length violin plot
   output$game_length_violin_plot <- renderPlot({
     if (input$compare == 0 ||
         input$opening1 == "Select an opening" ||
@@ -132,7 +139,7 @@ server <- function(input, output, session) {
     }
   })
   
-  # 7. ELO distribution plot
+  # 6. ELO distribution plot
   output$elo_distribution_plot <- renderPlot({
     if (input$compare == 0 ||
         input$opening1 == "Select an opening" ||
@@ -153,7 +160,7 @@ server <- function(input, output, session) {
     }
   })
   
-  # 8. Time control distribution plot
+  # 7. Time control distribution plot
   output$time_control_plot <- renderPlot({
     if (input$compare == 0 ||
         input$opening1 == "Select an opening" ||
@@ -171,6 +178,27 @@ server <- function(input, output, session) {
         theme_minimal()
     } else {
       plot_time_control_distribution(data1, data2, input$opening1, input$opening2)
+    }
+  })
+  
+  # 8. Castling comparison plot
+  output$castling_plot <- renderPlot({
+    if (input$compare == 0 ||
+        input$opening1 == "Select an opening" ||
+        input$opening2 == "Select an opening") {
+      return(NULL)
+    }
+    
+    stats1 <- get_castling_stats(con, input$opening1)
+    stats2 <- get_castling_stats(con, input$opening2)
+    
+    if (sum(stats1$white_castling$count) == 0 || sum(stats2$white_castling$count) == 0) {
+      ggplot() +
+        annotate("text", x = 1, y = 1,
+                 label = "No data available for one or both openings") +
+        theme_minimal()
+    } else {
+      plot_castling_stats(stats1, stats2, input$opening1, input$opening2)
     }
   })
   
