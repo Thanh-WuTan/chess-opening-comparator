@@ -10,7 +10,7 @@ CREATE TABLE openings (
     INDEX idx_opening_id (opening_id)
 ) ENGINE=InnoDB;
 
--- Create games table with TimeControl column
+-- Create games table with TimeControl and an columns
 CREATE TABLE games (
     game_id INT AUTO_INCREMENT PRIMARY KEY,
     event TEXT,
@@ -21,7 +21,8 @@ CREATE TABLE games (
     opening_id INT,
     nb_of_moves INT,
     avg_elo FLOAT,
-    timecontrol VARCHAR(50), -- New column for time control
+    TimeControl VARCHAR(50),
+    an TEXT NOT NULL,
     FOREIGN KEY (opening_id) REFERENCES openings(opening_id) ON DELETE CASCADE,
     INDEX idx_opening_id (opening_id)
 ) ENGINE=InnoDB;

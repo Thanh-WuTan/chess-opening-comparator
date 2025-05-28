@@ -43,6 +43,52 @@ def get_or_create_opening(cursor, name, eco):
     cursor.execute("INSERT INTO openings (name, eco) VALUES (%s, %s)", (name, eco))
     return cursor.lastrowid
 
+def validate_an_format(an):
+    """
+    Validate that the algebraic notation (an) is in the correct format:
+    - Must be in the form "number. white_move black_move" (e.g., "1. Nf3 e6")
+    - Must end with a result ("1-0", "0-1", or "1/2-1/2")
+    - No additional annotations or comments allowed
+    Returns True if valid, False otherwise.
+    """
+    if not an:
+        return False
+
+    # Expected result at the end
+    valid_results = ['1-0', '0-1', '1/2-1/2']
+    an_parts = an.strip().split()
+    
+    # Check if the last part is a valid result
+    if an_parts[-1] not in valid_results:
+        return False
+    
+    # Remove the result to validate the moves
+    move_parts = an_parts[:-1]
+    if not move_parts:
+        return False
+
+    # Regular expression for a single move: "number. white_move black_move"
+    move_pattern = r'^\d+\.\s+[a-h1-8NBRQKxO\-+#=]+(?:[a-h1-8x+#=])*\s+[a-h1-8NBRQKxO\-+#=]+(?:[a-h1-8x+#=])*$'
+    i = 0
+    while i < len(move_parts):
+        # Expect "number." (e.g., "1.")
+        if i + 2 >= len(move_parts):
+            return False  # Not enough parts for a full move
+        
+        # Check if the first part is "number."
+        if not re.match(r'^\d+\.$', move_parts[i]):
+            return False
+        
+        # Check if the next two parts are valid moves and form a full move entry
+        move_entry = f"{move_parts[i]} {move_parts[i+1]} {move_parts[i+2]}"
+        if not re.match(move_pattern, move_entry):
+            return False
+        
+        i += 3  # Move to the next set (number. white black)
+
+    # Ensure we've consumed all parts except the result
+    return i == len(move_parts)
+
 def insert_game(cursor, row):
     event = row[0].strip()
     white_elo = int(row[6])
@@ -58,13 +104,15 @@ def insert_game(cursor, row):
     # Check for missing or empty TimeControl
     if not time_control or time_control == '-':
         return False  # Skip this game
-
+    if not validate_an_format(an):
+        return False 
+  
     opening_id = get_or_create_opening(cursor, opening_name, eco)
     cursor.execute("""
         INSERT INTO games (
-            event, result, white_elo, black_elo, open_name, opening_id, nb_of_moves, avg_elo, TimeControl
-        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-    """, (event, result, white_elo, black_elo, opening_name, opening_id, nb_moves, avg_elo, time_control))
+            event, result, white_elo, black_elo, open_name, opening_id, nb_of_moves, avg_elo, TimeControl, an
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """, (event, result, white_elo, black_elo, opening_name, opening_id, nb_moves, avg_elo, time_control, an))
     return True
 
 def main():
